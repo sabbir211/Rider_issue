@@ -22,6 +22,7 @@ const Navbar = () => {
               className="dark:invert"
               width={200}
               height={200}
+              alt="logo"
             ></Image>
           </Link>
 
@@ -57,27 +58,17 @@ const Navbar = () => {
               </Button>
             </Link>
             <Link
-              href="/contact"
+              href="/logReg"
               className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             >
               <Button
                 variant="outline"
                 className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
               >
-               LOGIN
+               Login/Register
               </Button>
             </Link>
-            <Link
-              href="/contact"
-              className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            >
-              <Button
-                variant="outline"
-                className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
-              >
-                REGISTER
-              </Button>
-            </Link>
+          
           </div>
 
           <button
@@ -136,7 +127,7 @@ const Navbar = () => {
               </Button>
           </Link>
           <Link
-            href="/contact"
+            href="/logReg"
             className="block text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             onClick={() => setIsOpen(false)}
           >
@@ -144,21 +135,10 @@ const Navbar = () => {
                 variant="outline"
                 className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
               >
-                LOGIN
+                Login/Register
               </Button>
           </Link>
-          <Link
-            href="/contact"
-            className="block text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            onClick={() => setIsOpen(false)}
-          >
-            <Button
-                variant="outline"
-                className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
-              >
-                REGISTER
-              </Button>
-          </Link>
+         
          
         </div>
       </div>
