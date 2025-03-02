@@ -1,19 +1,48 @@
 "use client";
 
-import React from "react";
-import { Facebook, Github, Google, Key, Mail } from "lucide-react";
+import React, { useState } from "react";
+import { Facebook, Github, Google, Key, Mail, Loader } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import auth from "../../../../firebase.init";
 
-export default function Login({updateLogRegState}) {
+export default function Login({ updateLogRegState }) {
   const { register, handleSubmit } = useForm();
   const router = useRouter();
+  const [errorMessage, setErrorMessage] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  async function loginUser(email, password) {
+    setLoading(true);
+    setErrorMessage("");
+    try {
+      const userCredential = await signInWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      if (!user.emailVerified) {
+        throw new Error("Email not verified! Please check your inbox.");
+      }
+
+      console.log("User logged in:", user);
+      router.push("/"); // Redirect after successful login
+    } catch (error) {
+      const errorMessages = {
+        "auth/user-not-found": "No account found with this email.",
+        "auth/wrong-password": "Incorrect password. Please try again.",
+        "auth/invalid-email": "Invalid email format.",
+        "auth/user-disabled": "This account has been disabled.",
+      };
+      setErrorMessage(errorMessages[error.code] || "Login failed. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   const onSubmit = async (data, event) => {
     event.preventDefault();
-    console.log("User Data:", data);
-    router.push("/"); // Redirect to home page
+    await loginUser(data.email, data.password);
   };
 
   return (
@@ -21,6 +50,10 @@ export default function Login({updateLogRegState}) {
       <div className="py-5 px-2 md:px-8 my-10">
         <h1 className="text-2xl font-bold text-blue-900">Sign in to Account</h1>
         <div className="mx-auto my-2 w-12 bg-white border-2 border-blue-900 rounded-md"></div>
+
+        {errorMessage && (
+          <p className="text-red-600 font-semibold text-center mb-4">{errorMessage}</p>
+        )}
 
         <form onSubmit={handleSubmit(onSubmit)}>
           <div className="px-5 flex flex-col gap-6 mt-10 mb-2">
@@ -39,7 +72,7 @@ export default function Login({updateLogRegState}) {
               <Key className="text-gray-600" />
               <input
                 type="password"
-                className="grow focus:outline-none  text-lg border-b-2 focus:border-red-400"
+                className="grow focus:outline-none text-lg border-b-2 focus:border-red-400"
                 placeholder="Password"
                 {...register("password")}
                 required
@@ -63,7 +96,15 @@ export default function Login({updateLogRegState}) {
             </div>
           </div>
           <div className="my-5">
-            <Button variant="outline">REGISTER</Button>
+            <Button variant="outline" type="submit" disabled={loading}>
+              {loading ? (
+                <span className="flex items-center">
+                  <Loader className="animate-spin mr-2" /> Logging in...
+                </span>
+              ) : (
+                "LOGIN"
+              )}
+            </Button>
           </div>
           <div>
             <p className="text-left p-4">

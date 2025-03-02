@@ -8,7 +8,7 @@ export default function Footer() {
         {/* Logo & Description */}
         <div>
           <div className="flex items-center">
-            <Image src={logo} className="text-white w-24" />
+            <Image src={logo} alt="logo" className="text-white w-24" />
             <div>
               <h4>RIDER</h4>
               <h5>ISSUE SOLVER</h5>
