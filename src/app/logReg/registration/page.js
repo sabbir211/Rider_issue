@@ -84,6 +84,8 @@ export default function Registration({ updateLogRegState }) {
       await sendEmailVerification(userCredential.user);
       setErrorMsg("Verification email sent! Please check your inbox.");
     } catch (error) {
+      console.log(error);
+      
       const errorMessages = {
         "auth/email-already-in-use": "This email is already registered.",
         "auth/invalid-email": "Invalid email format.",

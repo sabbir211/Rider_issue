@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
+import Link from "next/link";
 
 export default function Banner() {
   const [bgImage, setBgImage] = useState("/banner-bg.webp");
@@ -32,11 +33,18 @@ export default function Banner() {
           SOLVE & GET <span className="text-red-600">SOLVED </span>
         </h2>
         <p className="md:text-xl mt-5">
-          A rider can submit an issue and a manager can update its status by solving
-          or denying it & a lot more.
+          A rider can submit an issue and a manager can update its status by
+          solving or denying it & a lot more.
         </p>
         <div className="mt-5">
-          <Button variant="outline" className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white">SUBMIT A ISSUE</Button>
+          <Link href="/reportIssue">
+            <Button
+              variant="outline"
+              className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+            >
+              SUBMIT A ISSUE
+            </Button>
+          </Link>
         </div>
       </div>
     </div>

@@ -50,7 +50,7 @@ const Navbar = () => {
             </Link>
             <span>|</span>
             <Link
-              href="/contact"
+              href="/reportIssue"
               className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             >
               <Button
@@ -64,10 +64,9 @@ const Navbar = () => {
               <Button
                 variant="outline"
                 className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
-              
-                onClick={()=>signOut(auth)}
+                onClick={() => signOut(auth)}
               >
-               Logout
+                Logout
               </Button>
             ) : (
               <Link
@@ -128,7 +127,7 @@ const Navbar = () => {
             Contact
           </Link>
           <Link
-            href="/contact"
+            href="/reportIssue"
             className="block text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
             onClick={() => setIsOpen(false)}
           >
@@ -139,18 +138,27 @@ const Navbar = () => {
               SUBMIT A ISSUE
             </Button>
           </Link>
-          <Link
-            href="/logReg"
-            className="block text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            onClick={() => setIsOpen(false)}
-          >
+          {user?.emailVerified ? (
             <Button
               variant="outline"
               className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+              onClick={() => signOut(auth)}
             >
-              Login/Register
+              Logout
             </Button>
-          </Link>
+          ) : (
+            <Link
+              href="/logReg"
+              className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+            >
+              <Button
+                variant="outline"
+                className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+              >
+                Login/Register
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
