@@ -24,9 +24,10 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Router } from "next/router";
 import { useRouter } from "next/navigation";
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useUser } from "../userContext";
+import { Loader } from "lucide-react";
 
 // Schema
 const formSchema = z.object({
@@ -45,6 +46,21 @@ const formSchema = z.object({
 });
 
 export default function ProfileForm() {
+  const { userData, loading } = useUser();
+  const [isLoading, setIsLoading] = useState(loading); // Loading state for the form
+
+  // Set the RiderId value once userData is available
+  useEffect(() => {
+    if (loading) {
+      setIsLoading(true); // Set the form as loading until data is available
+    } else {
+      setIsLoading(false); // Once data is loaded, stop loading
+      if (userData?.user_id) {
+        form.setValue("RiderId", Number(userData.user_id)); // Set the RiderId value
+      }
+    }
+  }, [userData, loading]);
+
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -53,42 +69,45 @@ export default function ProfileForm() {
       description: "",
     },
   });
+
   const router = useRouter();
+
   function onSubmit(values) {
-    // console.log("Form Data to DB:", values);
-  
-    fetch('/api/store_issues', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+    setIsLoading(true);
+    fetch("/api/store_issues", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify(values),
     })
-      .then((response) => response.json())  // Parse the JSON response
+      .then((response) => response.json()) // Parse the JSON response
       .then((data) => {
-        // Check if the response is successful
-        if (data.message === 'Issue stored successfully!') {
-          // Show success message
-          alert('Issue submitted successfully!');
-          router.push('/')
+        if (data.message === "Issue stored successfully!") {
+          alert("Issue submitted successfully!");
+          setIsLoading(false);
         } else {
-          // Show error message
-          alert(`Error: ${data.message || 'Unknown error'}`);
+          alert(`Error: ${data.message || "Unknown error"}`);
         }
+        router.push("/");
       })
       .catch((error) => {
-        // Catch any network or other errors
-        alert('Network error or failed to connect');
-        // console.error('Error:', error);
+        alert("Network error or failed to connect");
       });
   }
-  
-  
+
+  if (loading ||isLoading) {
+    return (
+     <div className="flex items-center min-h-screen justify-center">
+        <Loader className="animate-spin mr-2" /> Loading...
+      </div>
+    ); 
+  }
 
   return (
     <div className="flex flex-col items-center mx-7">
       <div className="text-gray-500 mt-5 mb-5 text-lg md:text-4xl md:mt-16  font-semibold">
         <h1>Fill the form correctly to get solved</h1>
       </div>
-      <div className=" md:w-1/4 w-full m-8 md:m-6">
+      <div className="md:w-1/4 w-full m-8 md:m-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
             <FormField
@@ -98,17 +117,11 @@ export default function ProfileForm() {
                 <FormItem>
                   <FormLabel>RiderId</FormLabel>
                   <FormControl>
-                    <Input
-                      type="number"
-                      placeholder="5 digit rider id"
-                      {...field}
-                      value={field.value ?? ""}
-                      onChange={(e) =>
-                        field.onChange(e.target.value === "" ? "" : +e.target.value)
-                      }
-                    />
+                    <Input type="number" {...field} readOnly />
                   </FormControl>
-                  <FormDescription>This is your 5 digit rider Id.</FormDescription>
+                  <FormDescription>
+                    This is your 5 digit rider Id.
+                  </FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
@@ -121,22 +134,25 @@ export default function ProfileForm() {
                 <FormItem>
                   <FormLabel>Select Your Problem</FormLabel>
                   <FormControl>
-                    <Select
-                      onValueChange={field.onChange}
-                      value={field.value}
-                    >
+                    <Select onValueChange={field.onChange} value={field.value}>
                       <SelectTrigger className="w-full">
                         <SelectValue placeholder="click here to select" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="cash_not_clear">Cash Not Cleared</SelectItem>
-                        <SelectItem value="unable_to_login">Unable to login</SelectItem>
-                        <SelectItem value="cancel_order">Cancel Order</SelectItem>
+                        <SelectItem value="cash_not_clear">
+                          Cash Not Cleared
+                        </SelectItem>
+                        <SelectItem value="unable_to_login">
+                          Unable to login
+                        </SelectItem>
+                        <SelectItem value="cancel_order">
+                          Cancel Order
+                        </SelectItem>
                         <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   </FormControl>
-                
+
                   <FormMessage />
                 </FormItem>
               )}
