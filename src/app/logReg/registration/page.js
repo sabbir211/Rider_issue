@@ -26,12 +26,27 @@ export default function Registration({ updateLogRegState }) {
 
   const [rider, setRider] = useState({});
 
-  const storeUser = async (email, userId, role = "rider") => {
+  const checkUserIdAvailability = async (riderId) => {
+    try {
+      const res = await fetch(
+        `/api/checkUserExist?user_id=${encodeURIComponent(riderId)}`
+      );
+      if (res.status === 409) {
+        return false; // Rider ID already exists
+      }
+      return true; // Rider ID is available
+    } catch (err) {
+      console.error("Error checking rider ID:", err);
+      return false;
+    }
+  };
+
+  const storeUser = async (email, userId, role = "rider", firebase_uid) => {
     try {
       const response = await fetch("/api/storeUser", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, user_id: userId, role }),
+        body: JSON.stringify({ email, user_id: userId, role, firebase_uid }),
       });
 
       if (!response.ok) throw new Error("Failed to store user");
@@ -45,23 +60,24 @@ export default function Registration({ updateLogRegState }) {
   useEffect(() => {
     const checkAndStoreUser = async () => {
       if (auth.currentUser) {
-        await auth.currentUser.reload(); // Reload user to get the latest status
+        await auth.currentUser.reload();
+
         if (auth.currentUser.emailVerified) {
-          storeUser(rider.email, rider.rider_id, rider.role);
-          clearInterval(interval); // Stop checking once verified
-          router.refresh(); // Reload the app
-          router.push("/"); // Redirect to the home page
+          const firebase_uid = user?.user?.uid; // ✅ fix here
+
+          storeUser(rider.email, rider.rider_id, rider.role, firebase_uid);
+
+          clearInterval(interval); // stop polling
+          router.refresh();
+          router.push("/");
         }
       }
     };
-  
-    const interval = setInterval(() => {
-      checkAndStoreUser();
-    }, 3000); // Check every 3 seconds
-  
-    return () => clearInterval(interval); // Cleanup when component unmounts
-  }, [currentUser, rider, router]);
-  
+
+    const interval = setInterval(checkAndStoreUser, 3000);
+
+    return () => clearInterval(interval);
+  }, [user, rider, router]);
 
   // Register user & send verification email
   const registerUser = async (riderId, email, password) => {
@@ -73,19 +89,12 @@ export default function Registration({ updateLogRegState }) {
         email,
         password
       );
-      // if (!userCredential?.user) throw new Error("User creation failed");
-
-      // const actionCodeSettings = {
-      //   url: `http://localhost:3000/`,
-      //   handleCodeInApp: true,
-      // };
-
-      // await sendEmailVerification(userCredential.user, actionCodeSettings);
+     
       await sendEmailVerification(userCredential.user);
       setErrorMsg("Verification email sent! Please check your inbox.");
     } catch (error) {
       console.log(error);
-      
+
       const errorMessages = {
         "auth/email-already-in-use": "This email is already registered.",
         "auth/invalid-email": "Invalid email format.",
@@ -103,7 +112,17 @@ export default function Registration({ updateLogRegState }) {
   // Handle form submission
   const onSubmit = async (data, event) => {
     event.preventDefault();
-
+setLoading(true);
+    const isAvailable = await checkUserIdAvailability(data.riderId);
+    setLoading(false);
+    if (!isAvailable) {
+      setErrorMsg(" Rider ID already exists. Please choose another.");
+      return;
+    }
+    if(Number(data.riderId)<10000 || Number(data.riderId)>99999){
+      setErrorMsg("Rider ID needs to be exactly 5 digit");
+      return;
+    }
     setRider({ rider_id: data.riderId, email: data.email, role: "rider" });
     registerUser(data.riderId, data.email, data.password);
   };

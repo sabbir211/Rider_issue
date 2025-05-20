@@ -11,10 +11,10 @@ export default function Issues() {
   const [loader, setLoader] = useState(false);
   useEffect(() => {
     async function fetchData() {
-      if (!userData?.user_id) return;
+      if (!userData?.db?.user_id) return;
       setLoader(true);
       const res = await fetch(
-        `http://localhost:3000/api/retrieve_issues?RiderId=${userData.user_id}&page=1`,
+        `http://localhost:3000/api/retrieve_issues?RiderId=${userData.db.user_id}&page=1`,
         {
           cache: "no-cache",
         }

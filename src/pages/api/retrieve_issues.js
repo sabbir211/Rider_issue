@@ -43,7 +43,7 @@ export default async function handler(req, res) {
 
     res.status(200).json(result.recordset);
   } catch (err) {
-    console.error("SQL ERROR:", err); // 🔥 This will help find the cause
+    console.error("SQL ERROR:", err); 
     res.status(500).json({ message: 'Error fetching issues', error: err.message });
   }
 }

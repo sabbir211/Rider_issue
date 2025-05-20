@@ -1,4 +1,5 @@
 import { getDBConnection } from "@/lib/db";
+import { verifyFirebaseToken } from "@/lib/firebaseAdmin"; // ✅ Use helper instead
 
 export default async function handler(req, res) {
   const pool = await getDBConnection();
@@ -6,13 +7,12 @@ export default async function handler(req, res) {
   switch (req.method) {
     case "POST":
       try {
-        const { email, user_id, role } = req.body;
+        const { email, user_id, role, firebase_uid } = req.body;
 
-        if (!email || !user_id) {
-          return res.status(400).json({ error: "Email and User ID are required" });
+        if (!email || !user_id || !firebase_uid) {
+          return res.status(400).json({ error: "Missing required fields" });
         }
 
-        // Check if user already exists
         const checkResult = await pool
           .request()
           .input("email", email)
@@ -22,34 +22,45 @@ export default async function handler(req, res) {
           return res.status(409).json({ error: "User already exists" });
         }
 
-        // Insert new user
         await pool
           .request()
           .input("user_id", user_id)
           .input("email", email)
           .input("role", role || "rider")
+          .input("firebase_uid", firebase_uid)
           .query(
-            "INSERT INTO users (user_id, email, role) VALUES (@user_id, @email, @role)"
+            "INSERT INTO users (user_id, email, role, firebase_uid) VALUES (@user_id, @email, @role, @firebase_uid)"
           );
 
-        return res.status(201).json({ success: true, message: "User stored successfully!" });
+        return res.status(201).json({ success: true });
       } catch (error) {
         console.error("POST error:", error);
-        return res.status(500).json({ error: "Internal Server Error", details: error.message });
+        return res.status(500).json({ error: error.message });
       }
 
     case "GET":
       try {
-        const { email } = req.query;
+        const authHeader = req.headers.authorization || "";
+        const token = authHeader.replace("Bearer ", "");
+        // console.log("🔐 Incoming token:", token);
 
-        if (!email) {
-          return res.status(400).json({ error: "Email is required in query" });
+        if (!token) {
+          return res.status(401).json({ error: "No token provided" });
         }
+
+        // ✅ Use helper to verify Firebase token
+        const decodedToken = await verifyFirebaseToken(token);
+
+        if (!decodedToken) {
+          return res.status(401).json({ error: "Unauthorized" });
+        }
+
+        const firebase_uid = decodedToken.uid;
 
         const result = await pool
           .request()
-          .input("email", email)
-          .query("SELECT * FROM users WHERE email = @email");
+          .input("firebase_uid", firebase_uid)
+          .query("SELECT * FROM users WHERE firebase_uid = @firebase_uid");
 
         if (result.recordset.length === 0) {
           return res.status(404).json({ error: "User not found" });
@@ -58,7 +69,9 @@ export default async function handler(req, res) {
         return res.status(200).json(result.recordset[0]);
       } catch (error) {
         console.error("GET error:", error);
-        return res.status(500).json({ error: "Internal Server Error", details: error.message });
+        return res
+          .status(500)
+          .json({ error: "Server error", details: error.message });
       }
 
     default:

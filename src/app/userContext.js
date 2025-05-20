@@ -1,10 +1,8 @@
 // UserContext.js
-"use client"
+"use client";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
 import auth from "../../firebase.init";
-import Loadable from "next/dist/shared/lib/loadable.shared-runtime";
-
 
 const UserContext = createContext(null);
 
@@ -14,26 +12,32 @@ export const UserProvider = ({ children }) => {
 
   useEffect(() => {
     async function fetchUserDetails() {
-       
       if (currentUser) {
         try {
-          const res = await fetch(`/api/storeUser?email=${currentUser.email}`, {
+          const token = await currentUser.getIdToken();
+          // console.log("🔑 Firebase token:", token);
+
+          const res = await fetch(`/api/storeUser`, {
             method: "GET",
             headers: {
               "Content-Type": "application/json",
+              Authorization: `Bearer ${token}`,
             },
-            
           });
 
           const data = await res.json();
+          // console.log("✅ User data:", data);
 
           if (res.ok) {
-            setUserData({ ...currentUser, ...data }); // includes RiderId, etc.
+            setUserData({
+              firebase: currentUser,
+              db: data, // contains role, user_id, etc.
+            });
           } else {
-            console.error("Failed to load user details:", data.message);
+            console.error("❌ Failed to load user data:", data);
           }
         } catch (err) {
-          console.error("Error fetching user info:", err);
+          console.error("🚨 Error fetching user info:", err);
         }
       }
     }

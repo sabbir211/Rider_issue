@@ -9,9 +9,17 @@ import { Button } from "./ui/button";
 import { useAuthState } from "react-firebase-hooks/auth";
 import auth from "../../firebase.init";
 import { signOut } from "firebase/auth";
+import { useUser } from "@/app/userContext";
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [user, loading, error] = useAuthState(auth);
+  const [user, error] = useAuthState(auth);
+  const { userData, loading } = useUser();
+  if (loading) {
+    return <p>loading.....</p>;
+  }
+  const role = userData?.db?.role;
+  console.log(role);
+
   return (
     <nav className="bg-white dark:bg-gray-900 shadow-md">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,7 +46,7 @@ const Navbar = () => {
             </Link>
             <Link
               href="/issues"
-              className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              className={` text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white ${role=="admin"?"hidden":""}`}
             >
               Issues
             </Link>
@@ -49,17 +57,37 @@ const Navbar = () => {
               Contact
             </Link>
             <span>|</span>
-            <Link
-              href="/reportIssue"
-              className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            >
-              <Button
-                variant="outline"
-                className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
-              >
-                SUBMIT A ISSUE
-              </Button>
-            </Link>
+
+            {role == "rider" ? (
+              <>
+                <Link
+                  href="/reportIssue"
+                  className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                >
+                  <Button
+                    variant="outline"
+                    className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+                  >
+                    SUBMIT A ISSUE
+                  </Button>
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/dashboard"
+                  className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                >
+                  <Button
+                    variant="outline"
+                    className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+                  >
+                    Dashboard
+                  </Button>
+                </Link>
+              </>
+            )}
+
             {user?.emailVerified ? (
               <Button
                 variant="outline"
@@ -113,12 +141,11 @@ const Navbar = () => {
             Home
           </Link>
           <Link
-            href="/issues"
-            className="block text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            onClick={() => setIsOpen(false)}
-          >
-            Issues
-          </Link>
+              href="/issues"
+              className={` text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white ${role=="admin"?"hidden":""}`}
+            >
+              Issues
+            </Link>
           <Link
             href="/contact"
             className="block text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -126,18 +153,35 @@ const Navbar = () => {
           >
             Contact
           </Link>
-          <Link
-            href="/reportIssue"
-            className="block text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-            onClick={() => setIsOpen(false)}
-          >
-            <Button
-              variant="outline"
-              className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
-            >
-              SUBMIT A ISSUE
-            </Button>
-          </Link>
+          {role == "rider" ? (
+            <>
+              <Link
+                href="/reportIssue"
+                className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              >
+                <Button
+                  variant="outline"
+                  className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+                >
+                  SUBMIT A ISSUE
+                </Button>
+              </Link>
+            </>
+          ) : (
+            <>
+              <Link
+                href="/dashboard"
+                className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+              >
+                <Button
+                  variant="outline"
+                  className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+                >
+                  Dashboard
+                </Button>
+              </Link>
+            </>
+          )}
           {user?.emailVerified ? (
             <Button
               variant="outline"

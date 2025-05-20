@@ -51,12 +51,14 @@ export default function ProfileForm() {
 
   // Set the RiderId value once userData is available
   useEffect(() => {
+    console.log("ReportIssue:",userData?.db?.user_id);
+    
     if (loading) {
       setIsLoading(true); // Set the form as loading until data is available
     } else {
       setIsLoading(false); // Once data is loaded, stop loading
-      if (userData?.user_id) {
-        form.setValue("RiderId", Number(userData.user_id)); // Set the RiderId value
+      if (userData?.db?.user_id) {
+        form.setValue("RiderId", Number(userData?.db?.user_id)); // Set the RiderId value
       }
     }
   }, [userData, loading]);
