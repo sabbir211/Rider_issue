@@ -28,6 +28,7 @@ import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { useUser } from "../userContext";
 import { Loader } from "lucide-react";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 // Schema
 const formSchema = z.object({
@@ -51,8 +52,8 @@ export default function ProfileForm() {
 
   // Set the RiderId value once userData is available
   useEffect(() => {
-    console.log("ReportIssue:",userData?.db?.user_id);
-    
+    // console.log("ReportIssue:",userData?.db?.user_id);
+
     if (loading) {
       setIsLoading(true); // Set the form as loading until data is available
     } else {
@@ -96,94 +97,99 @@ export default function ProfileForm() {
       });
   }
 
-  if (loading ||isLoading) {
+  if (loading || isLoading) {
     return (
-     <div className="flex items-center min-h-screen justify-center">
+      <div className="flex items-center min-h-screen justify-center">
         <Loader className="animate-spin mr-2" /> Loading...
       </div>
-    ); 
+    );
   }
 
   return (
-    <div className="flex flex-col items-center mx-7">
-      <div className="text-gray-500 mt-5 mb-5 text-lg md:text-4xl md:mt-16  font-semibold">
-        <h1>Fill the form correctly to get solved</h1>
+    <ProtectedRoute>
+      <div className="flex flex-col items-center mx-7">
+        <div className="text-gray-500 mt-5 mb-5 text-lg md:text-4xl md:mt-16  font-semibold">
+          <h1>Fill the form correctly to get solved</h1>
+        </div>
+        <div className="md:w-1/4 w-full m-8 md:m-6">
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+              <FormField
+                control={form.control}
+                name="RiderId"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>RiderId</FormLabel>
+                    <FormControl>
+                      <Input type="number" {...field} readOnly />
+                    </FormControl>
+                    <FormDescription>
+                      This is your 5 digit rider Id.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="problem_type"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Select Your Problem</FormLabel>
+                    <FormControl>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="click here to select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="cash_not_clear">
+                            Cash Not Cleared
+                          </SelectItem>
+                          <SelectItem value="unable_to_login">
+                            Unable to login
+                          </SelectItem>
+                          <SelectItem value="cancel_order">
+                            Cancel Order
+                          </SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </FormControl>
+
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Type your message here."
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Write full details (max 150 words)
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <Button type="submit">Submit</Button>
+            </form>
+          </Form>
+        </div>
       </div>
-      <div className="md:w-1/4 w-full m-8 md:m-6">
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <FormField
-              control={form.control}
-              name="RiderId"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>RiderId</FormLabel>
-                  <FormControl>
-                    <Input type="number" {...field} readOnly />
-                  </FormControl>
-                  <FormDescription>
-                    This is your 5 digit rider Id.
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="problem_type"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Select Your Problem</FormLabel>
-                  <FormControl>
-                    <Select onValueChange={field.onChange} value={field.value}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="click here to select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="cash_not_clear">
-                          Cash Not Cleared
-                        </SelectItem>
-                        <SelectItem value="unable_to_login">
-                          Unable to login
-                        </SelectItem>
-                        <SelectItem value="cancel_order">
-                          Cancel Order
-                        </SelectItem>
-                        <SelectItem value="other">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
-
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="description"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Description</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Type your message here."
-                      {...field}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    Write full details (max 150 words)
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <Button type="submit">Submit</Button>
-          </form>
-        </Form>
-      </div>
-    </div>
+    </ProtectedRoute>
   );
 }

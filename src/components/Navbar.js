@@ -58,23 +58,9 @@ const Navbar = () => {
             </Link>
             <span>|</span>
 
-            {role == "rider" ? (
+            {role == "admin" ? (
               <>
-                <Link
-                  href="/reportIssue"
-                  className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-                >
-                  <Button
-                    variant="outline"
-                    className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
-                  >
-                    SUBMIT A ISSUE
-                  </Button>
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
+              <Link
                   href="/dashboard"
                   className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
                 >
@@ -83,6 +69,21 @@ const Navbar = () => {
                     className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
                   >
                     Dashboard
+                  </Button>
+                </Link>
+               
+              </>
+            ) : (
+              <>
+                 <Link
+                  href="/reportIssue"
+                  className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
+                >
+                  <Button
+                    variant="outline"
+                    className="border border-red-600 text-red-600 hover:bg-red-600 hover:text-white"
+                  >
+                    SUBMIT A ISSUE
                   </Button>
                 </Link>
               </>

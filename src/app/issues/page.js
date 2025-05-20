@@ -4,10 +4,11 @@ import { columns } from "./columns";
 import { DataTable } from "./data-table";
 import { useUser } from "../userContext";
 import { Loader } from "lucide-react";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function Issues() {
   const { userData, loading } = useUser();
-  const [issueData, setIssueData] = useState([]); 
+  const [issueData, setIssueData] = useState([]);
   const [loader, setLoader] = useState(false);
   useEffect(() => {
     async function fetchData() {
@@ -40,8 +41,10 @@ export default function Issues() {
   }
 
   return (
-    <div className="container mx-auto py-10">
-      <DataTable columns={columns} data={issueData} />
-    </div>
+    <ProtectedRoute>
+      <div className="container mx-auto py-10">
+        <DataTable columns={columns} data={issueData} />
+      </div>
+    </ProtectedRoute>
   );
 }
