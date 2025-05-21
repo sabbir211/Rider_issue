@@ -23,14 +23,15 @@ export const columns = [
   {
     accessorKey: "Status",
     header: "Status",
+   header: "Status",
     cell: ({ row }) => {
       const status = row.original.Status;
       const statusColor =
-        status === "Pending"
+        status === "in_progress"
           ? "bg-yellow-500"
-          : status === "Resolved"
+          : status === "resolved"
           ? "bg-green-500"
-          : status === "Declined"
+          : status === "declined"
           ? "bg-red-500"
           : "bg-gray-500";
 
